@@ -268,7 +268,8 @@ ul {
     gap: 12px;
 }
 
-.form-row input[type="email"] {
+.form-row input[type="email"],
+.form-row input[type="text"] {
     flex: 1;
     padding: 16px 20px;
     font-family: var(--font-body);
@@ -281,16 +282,19 @@ ul {
     transition: border-color var(--transition), background-color var(--transition);
 }
 
-.form-row input[type="email"]::placeholder {
+.form-row input[type="email"]::placeholder,
+.form-row input[type="text"]::placeholder {
     color: var(--color-text-muted);
 }
 
-.form-row input[type="email"]:focus {
+.form-row input[type="email"]:focus,
+.form-row input[type="text"]:focus {
     border-color: var(--color-primary);
     background-color: rgba(255, 255, 255, 0.12);
 }
 
-.form-row input[type="email"].input--error {
+.form-row input[type="email"].input--error,
+.form-row input[type="text"].input--error {
     border-color: var(--color-error);
 }
 

@@ -8,24 +8,47 @@
 
     // ─── CONFIG ────────────────────────────────────────────────
     const WEBHOOK_URL = 'https://YOUR-N8N-WEBHOOK-URL'; // ← Replace with real n8n webhook
+    const PDF_URL = 'https://raw.githubusercontent.com/joseantoniodurapastor/Landing/main/Atlas_Estrategico_Agencias_IA_Feroz.pdf';
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // ─── DOM REFS ──────────────────────────────────────────────
     const form = document.getElementById('leadForm');
+    const nameInput = document.getElementById('nameInput');
     const emailInput = document.getElementById('emailInput');
     const submitBtn = document.getElementById('submitBtn');
     const timestampField = document.getElementById('timestampField');
     const errorMsg = document.getElementById('formError');
     const successMsg = document.getElementById('formSuccess');
 
+    // ─── PDF DOWNLOAD ──────────────────────────────────────────
+    function triggerDownload() {
+        var a = document.createElement('a');
+        a.href = PDF_URL;
+        a.download = 'Atlas_Estrategico_Agencias_IA_Feroz.pdf';
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
     // ─── FORM HANDLING ─────────────────────────────────────────
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
         clearMessages();
 
+        const name = nameInput.value.trim();
         const email = emailInput.value.trim();
 
-        // Validate
+        // Validate name
+        if (!name) {
+            showError('Por favor, introduce tu nombre');
+            nameInput.classList.add('input--error');
+            nameInput.focus();
+            return;
+        }
+
+        // Validate email
         if (!email || !EMAIL_REGEX.test(email)) {
             showError('Por favor, introduce un email válido');
             emailInput.classList.add('input--error');
@@ -38,40 +61,48 @@
 
         // Loading state
         submitBtn.classList.add('btn--loading');
-        submitBtn.textContent = 'ENVIANDO...';
+        submitBtn.textContent = 'DESCARGANDO...';
 
+        // 1) Trigger PDF download immediately
+        triggerDownload();
+
+        // 2) Send lead data to webhook in background
         try {
-            const response = await fetch(WEBHOOK_URL, {
+            await fetch(WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    name: name,
                     email: email,
                     timestamp: timestampField.value,
                     source: 'ebook_landing'
                 })
             });
-
-            if (!response.ok) throw new Error('Error en el servidor');
-
-            // Success
-            showSuccess('✓ ¡Listo! Revisa tu email en los próximos 2 minutos.');
-            emailInput.value = '';
-            emailInput.classList.remove('input--error');
-            form.classList.add('form--submitted');
-
-            // Analytics
-            trackConversion();
-
         } catch (err) {
-            showError('Hubo un problema al enviar. Inténtalo de nuevo.');
-            console.error('Webhook error:', err);
-        } finally {
-            submitBtn.classList.remove('btn--loading');
-            submitBtn.textContent = 'DESCARGAR ATLAS GRATUITO';
+            // Webhook failure doesn't block the user — PDF already downloading
+            console.warn('Webhook error (PDF still delivered):', err);
         }
+
+        // 3) Show success
+        showSuccess('✓ ¡Descarga iniciada! También recibirás el PDF por email.');
+        nameInput.value = '';
+        emailInput.value = '';
+        nameInput.classList.remove('input--error');
+        emailInput.classList.remove('input--error');
+        form.classList.add('form--submitted');
+        submitBtn.classList.remove('btn--loading');
+        submitBtn.textContent = 'DESCARGAR ATLAS GRATUITO';
+
+        // Analytics
+        trackConversion();
     });
 
     // Clear error on input
+    nameInput.addEventListener('input', function () {
+        nameInput.classList.remove('input--error');
+        clearMessages();
+    });
+
     emailInput.addEventListener('input', function () {
         emailInput.classList.remove('input--error');
         clearMessages();
