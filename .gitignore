@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Vercel
+.vercel
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Node (if any dev tooling is added later)
+node_modules/
