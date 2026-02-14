@@ -8,6 +8,7 @@
 
     // ─── CONFIG ────────────────────────────────────────────────
     const WEBHOOK_URL = 'https://YOUR-N8N-WEBHOOK-URL'; // ← Replace with real n8n webhook
+    const SHEET_WEBHOOK_URL = 'https://YOUR-APPS-SCRIPT-URL'; // ← Replace with Apps Script web app URL
     const PDF_URL = 'https://raw.githubusercontent.com/joseantoniodurapastor/Landing/main/Atlas_Estrategico_Agencias_IA_Feroz.pdf';
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -30,6 +31,16 @@
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+    }
+
+    // ─── SEND TO GOOGLE SHEET ──────────────────────────────────
+    function sendToSheet(payload) {
+        fetch(SHEET_WEBHOOK_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        }).catch(function (err) {
+            console.warn('Google Sheet error:', err);
+        });
     }
 
     // ─── FORM HANDLING ─────────────────────────────────────────
@@ -63,20 +74,24 @@
         submitBtn.classList.add('btn--loading');
         submitBtn.textContent = 'DESCARGANDO...';
 
+        var payload = {
+            name: name,
+            email: email,
+            timestamp: timestampField.value,
+            source: 'ebook_landing'
+        };
+
         // 1) Trigger PDF download immediately
         triggerDownload();
 
-        // 2) Send lead data to webhook in background
+        // 2) Send lead data to Google Sheet + n8n webhook in parallel
+        sendToSheet(payload);
+
         try {
             await fetch(WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: name,
-                    email: email,
-                    timestamp: timestampField.value,
-                    source: 'ebook_landing'
-                })
+                body: JSON.stringify(payload)
             });
         } catch (err) {
             // Webhook failure doesn't block the user — PDF already downloading
