@@ -8,7 +8,7 @@
 
     // ─── CONFIG ────────────────────────────────────────────────
     const WEBHOOK_URL = 'https://YOUR-N8N-WEBHOOK-URL'; // ← Replace with real n8n webhook
-    const SHEET_WEBHOOK_URL = 'https://YOUR-APPS-SCRIPT-URL'; // ← Replace with Apps Script web app URL
+    const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxWvNgWHYVZleEgCFplKOeSseniAoCAZrAUxMe4GXckx86gnRSVYq_waywhPwK0eKT8/exec';
     const PDF_URL = 'https://raw.githubusercontent.com/joseantoniodurapastor/Landing/main/Atlas_Estrategico_Agencias_IA_Feroz.pdf';
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
